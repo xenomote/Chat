@@ -11,9 +11,11 @@ public class ChatClient implements ConnectionHandler {
     private Socket server;
     private Connection connection;
     private BufferedReader input;
+    private ChatGUI gui;
 
     public ChatClient() {
         this.input = new BufferedReader(new InputStreamReader(System.in));
+        this.gui = new ChatGUI();
         getConnection();
         startListen();
     }
@@ -25,12 +27,18 @@ public class ChatClient implements ConnectionHandler {
     private void listen() {
         try {
             while (true) {
-                handleInput(input.readLine());
+                handleInput(gui.getMessage());
+                //handleInput(input.readLine());
             }
         }
 
-        catch(IOException e) {
+        /*catch(IOException e) {
             System.out.println("I/O exception occurred, closing");
+            System.exit(1);
+        }*/
+
+        catch (InterruptedException e) {
+            System.out.println("Input interrupted, closing");
             System.exit(1);
         }
     }
@@ -114,6 +122,7 @@ public class ChatClient implements ConnectionHandler {
 
     @Override
     public void notifyMessage(String message) {
+        gui.display(message);
         System.out.println(message);
     }
 }

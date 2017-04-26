@@ -41,9 +41,11 @@ class Connection {
      */
     private void listen() {
         try {
-            while (true) {
-                handler.notifyMessage(input.readLine());
-            }
+            for (String message;
+                 (message = input.readLine()) != null;
+                 handler.notifyMessage(message))
+                ;
+
         }
 
         catch (IOException e) {

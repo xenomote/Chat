@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
@@ -16,10 +17,10 @@ public class ChatGUI {
     private JButton sendButton;
     private JLabel messageDisplay;
     private MessageHolder messages;
+    private String lastMessage;
 
     public ChatGUI() {
         this.messages = new MessageHolder(LOG_SIZE);
-
         setFrame();
         setListeners();
         display();
@@ -27,7 +28,10 @@ public class ChatGUI {
     }
 
     private void setListeners() {
-        this.sendButton.addActionListener(e -> notifyAll());
+        this.messageBox.registerKeyboardAction(this::send, KeyStroke.getKeyStroke("ENTER"), JComponent.WHEN_FOCUSED);
+
+        this.sendButton.addActionListener(this::send);
+
         this.frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -53,29 +57,38 @@ public class ChatGUI {
     }
 
     private void display() {
-        messageDisplay.setText(String.join("\n", messages.getMessages()));
+        messageDisplay.setText("<html>" + String.join("<br>", messages.getMessages()) + "</html>");
         frame.setSize(frame.getPreferredSize());
     }
 
     public String getMessage() throws InterruptedException{
         synchronized (this) {
-            this.wait();
-            return messageBox.getText();
+            wait();
+            return lastMessage;
         }
     }
 
-    class MessageHolder {
+    private void send(ActionEvent e) {
+        synchronized (this){
+            lastMessage = messageBox.getText();
+            messageBox.setText("");
+            notifyAll();
+        }
+    }
+
+    private class MessageHolder {
         private String[] messages;
         private int mostRecent;
 
         MessageHolder(int size) {
             this.messages = new String[size];
-            Arrays.fill(this.messages,"");
             this.mostRecent = 0;
+
+            Arrays.fill(this.messages,"");
         }
 
         public String[] getMessages() {
-            String[] output = new String[10];
+            String[] output = new String[messages.length];
             for (int i = 0; i < messages.length; i++) {
                 output[i] = messages[(i + mostRecent) % messages.length];
             }
@@ -83,8 +96,8 @@ public class ChatGUI {
         }
 
         public void add(String message) {
-            advancePointer();
             messages[mostRecent] = message;
+            advancePointer();
         }
 
         public String getMostRecent() {

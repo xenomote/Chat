@@ -78,6 +78,7 @@ public class ChatServer implements ConnectionHandler {
      */
     @Override
     public void notifyClose(Connection connection) {
+        System.out.println("*A client left*");
         clients.remove(connection);
         getNewClients();
     }
