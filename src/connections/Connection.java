@@ -1,10 +1,12 @@
+package connections;
+
 import java.io.*;
 import java.net.Socket;
 
 /**
  * Representation of a connection to a socket.
  */
-class Connection {
+public class Connection {
     private ConnectionHandler handler;
     private BufferedReader input;
     private PrintWriter output;
@@ -41,10 +43,10 @@ class Connection {
      */
     private void listen() {
         try {
-            for (String message;
-                 (message = input.readLine()) != null;
-                 handler.notifyMessage(message))
-                ;
+            String message;
+            while ((message = input.readLine()) != null) {
+                handler.notifyMessage(message);
+            }
 
         }
 

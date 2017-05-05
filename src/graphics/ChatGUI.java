@@ -1,3 +1,5 @@
+package graphics;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
@@ -87,7 +89,7 @@ public class ChatGUI {
             Arrays.fill(this.messages,"");
         }
 
-        public String[] getMessages() {
+        String[] getMessages() {
             String[] output = new String[messages.length];
             for (int i = 0; i < messages.length; i++) {
                 output[i] = messages[(i + mostRecent) % messages.length];
@@ -95,12 +97,12 @@ public class ChatGUI {
             return output;
         }
 
-        public void add(String message) {
+        void add(String message) {
             messages[mostRecent] = message;
             advancePointer();
         }
 
-        public String getMostRecent() {
+        String getMostRecent() {
             return messages[mostRecent];
         }
 

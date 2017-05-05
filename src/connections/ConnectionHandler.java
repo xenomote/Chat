@@ -1,3 +1,5 @@
+package connections;
+
 public interface ConnectionHandler {
     void notifyConnection(Connection connection);
 
