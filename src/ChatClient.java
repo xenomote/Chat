@@ -4,7 +4,9 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 
 public class ChatClient implements ConnectionHandler {
+
     public static void main(String[] args) {
+
         new ChatClient();
     }
 
@@ -14,6 +16,7 @@ public class ChatClient implements ConnectionHandler {
     private ChatGUI gui;
 
     public ChatClient() {
+
         this.input = new BufferedReader(new InputStreamReader(System.in));
         this.gui = new ChatGUI();
         getConnection();
@@ -21,10 +24,12 @@ public class ChatClient implements ConnectionHandler {
     }
 
     private void startListen() {
+
         new Thread(this::listen).start();
     }
 
     private void listen() {
+
         try {
             while (true) {
                 handleInput(gui.getMessage());
@@ -44,6 +49,7 @@ public class ChatClient implements ConnectionHandler {
     }
 
     private void handleInput(String input) {
+
         switch (input) {
             case "exit":
                 // TODO: 22/04/2017 exit method
@@ -63,6 +69,7 @@ public class ChatClient implements ConnectionHandler {
     }
 
     private void getConnection() {
+
         String hostName;
         String portNumber;
 
@@ -91,12 +98,14 @@ public class ChatClient implements ConnectionHandler {
     }
 
     private void getConnection(String hostName, int portNumber) throws IOException {
+
         server = new Socket(hostName, portNumber);
         connection = new Connection(this, server);
     }
 
     @Override
     public void notifyClose(Connection connection) {
+
         System.out.println("Connection closed!");
         try {
             while (true) {
@@ -117,11 +126,13 @@ public class ChatClient implements ConnectionHandler {
 
     @Override
     public void notifyConnection(Connection connection) {
+
         connection.startListen();
     }
 
     @Override
     public void notifyMessage(String message) {
+
         gui.display(message);
         System.out.println(message);
     }
