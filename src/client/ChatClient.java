@@ -3,128 +3,156 @@ package client;
 import connections.*;
 import graphics.ChatGUI;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 
 public class ChatClient implements ConnectionHandler {
+
     public static void main(String[] args) {
+
         new ChatClient();
     }
 
     private Connection connection;
-    private BufferedReader input;
     private ChatGUI gui;
+    private String username;
 
     public ChatClient() {
-        this.input = new BufferedReader(new InputStreamReader(System.in));
+
         this.gui = new ChatGUI();
-        getConnection();
+        this.username = "anonymous";
+
         startListen();
     }
 
     private void startListen() {
+
         new Thread(this::listen).start();
     }
 
     private void listen() {
-        try {
-            while (true) {
-                handleInput(gui.getMessage());
-                //handleInput(input.readLine());
-            }
-        }
 
-        /*catch(IOException e) {
-            System.out.println("I/O exception occurred, closing");
-            System.exit(1);
-        }*/
-
-        catch (InterruptedException e) {
-            System.out.println("Input interrupted, closing");
-            System.exit(1);
-        }
+        while (true) handleInput(gui.getMessage());
     }
 
+    /**
+     * Deals with user input, responding to keywords and performing the relevant actions.
+     *
+     * @param input the message or command to be handled
+     */
     private void handleInput(String input) {
+
         switch (input) {
-            case "exit":
+            case "-exit":
                 // TODO: 22/04/2017 exit method
-                System.out.println("Exiting");
+                gui.display("Exiting");
                 System.exit(0);
                 break;
 
-            case "reconnect":
-                getConnection();
+            case "-connect":
+                connect();
+                break;
+
+            case "-username":
+                setUserName();
+                break;
+
+            case "-help":
+                displayHelp();
                 break;
 
             // TODO: 22/04/2017 other methods
 
             default:
-                connection.send(input);
+                if (connection != null && connection.isOpen()) {
+                    connection.send(username + " : " + input);
+                }
+
+                else {
+                    gui.display("Unrecognised command, try -help");
+                }
         }
     }
 
-    private void getConnection() {
-        String hostName;
-        String portNumber;
+    private void setUserName() {
+
+        //Get a new user name
+        do gui.display("new username: ");
+        while ((username = gui.getMessage()).isEmpty());
+    }
+
+    private void displayHelp() {
+
+        gui.display("<br>" +
+                "Commands are:" + "<br>" +
+                "-help : displays this help menu" + "<br>" +
+                "-connect : initiates connection to a chat server" + "<br>" +
+                "-exit : quits the program" + "<br>");
+    }
+
+    /**
+     * Asks the user for connection details and attempts connection until a successful connection is made
+     */
+    private void connect() {
 
         while (true) {
             try {
-                //Get the host name
-                do System.out.println("Hostname: ");
-                while ((hostName = input.readLine()).isEmpty());
-
-                //Get the port number
-                do System.out.println("Port number: ");
-                while (!(portNumber = input.readLine()).matches("\\d+"));
-
                 //Get the connection
-                getConnection(hostName, Integer.parseInt(portNumber));
+                connect(getConnectionInfo());
                 break;
             }
 
             catch (IOException e) {
-                System.out.println("Those settings were incorrect, try again");
+                gui.display("Those settings were incorrect, try again");
             }
         }
 
-        System.out.println("Connected!");
+        gui.display("Connected!");
     }
 
-    private void getConnection(String hostName, int portNumber) throws IOException {
-        Socket server = new Socket(hostName, portNumber);
+    /**
+     * Requests details of the chat server to connect to from the user.
+     *
+     * @return The connectionInfo object representing the user's input
+     * @throws IOException If there is an unexpected IO error during input
+     */
+    private ConnectionInfo getConnectionInfo() {
+
+        String hostName;
+        String portNumber;
+
+        //Get the host name
+        do gui.display("Hostname: ");
+        while ((hostName = gui.getMessage()).isEmpty());
+
+        //Get the port number
+        do gui.display("Port number: ");
+        while (!(portNumber = gui.getMessage()).matches("\\d+"));
+
+        return new ConnectionInfo(hostName, Integer.parseInt(portNumber));
+    }
+
+    private void connect(ConnectionInfo info) throws IOException {
+
+        Socket server = new Socket(info.getHostname(), info.getPortNumber());
         connection = new Connection(this, server);
     }
 
     @Override
     public void notifyClose(Connection connection) {
-        System.out.println("connections.Connection closed!");
-        try {
-            while (true) {
-                System.out.println("Do you wish to (reconnect), or (exit)?: ");
-                switch (input.readLine()) {
-                    case "reconnect":
-                        getConnection();
-                }
-            }
-        }
 
-        catch (IOException e) {
-            System.out.println("I/O exception occurred, closing");
-            System.exit(1);
-        }
+        gui.display("Connection closed!");
     }
 
     @Override
     public void notifyConnection(Connection connection) {
+
         connection.startListen();
     }
 
     @Override
     public void notifyMessage(String message) {
+
         gui.display(message);
-        System.out.println(message);
     }
 }

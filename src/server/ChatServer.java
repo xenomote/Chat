@@ -52,12 +52,11 @@ public class ChatServer implements ConnectionHandler {
         try {
             System.out.println("Waiting for client on port " + server.getLocalPort());
             clients.add(new Connection(this, server.accept()));
-            System.out.println("Client " + clients.size() + " connected!");
+            notifyMessage("Client " + clients.size() + " connected!");
         }
 
         //If there is an IOException then the client simply didn't connect
-        catch (IOException ignored) {
-        }
+        catch (IOException ignored) {/**/}
 
     }
 
@@ -94,7 +93,7 @@ public class ChatServer implements ConnectionHandler {
     @Override
     public void notifyClose(Connection connection) {
 
-        System.out.println("*A client left*");
+        notifyMessage("*A client left*");
         clients.remove(connection);
         getNewClients();
     }
