@@ -1,22 +1,21 @@
+import connections.*;
+import graphics.ChatGUI;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
 public class ChatClient implements ConnectionHandler {
-
     public static void main(String[] args) {
-
         new ChatClient();
     }
 
-    private Socket server;
     private Connection connection;
     private BufferedReader input;
     private ChatGUI gui;
 
     public ChatClient() {
-
         this.input = new BufferedReader(new InputStreamReader(System.in));
         this.gui = new ChatGUI();
         getConnection();
@@ -24,12 +23,10 @@ public class ChatClient implements ConnectionHandler {
     }
 
     private void startListen() {
-
         new Thread(this::listen).start();
     }
 
     private void listen() {
-
         try {
             while (true) {
                 handleInput(gui.getMessage());
@@ -49,7 +46,6 @@ public class ChatClient implements ConnectionHandler {
     }
 
     private void handleInput(String input) {
-
         switch (input) {
             case "exit":
                 // TODO: 22/04/2017 exit method
@@ -69,22 +65,20 @@ public class ChatClient implements ConnectionHandler {
     }
 
     private void getConnection() {
-
         String hostName;
         String portNumber;
 
         while (true) {
             try {
-                for (System.out.println("Hostname: ");
-                     (hostName = input.readLine()).isEmpty();
-                     System.out.println("Try again\nInput a valid host name: "))
-                    ;
+                //Get the host name
+                do System.out.println("Hostname: ");
+                while ((hostName = input.readLine()).isEmpty());
 
-                for (System.out.println("Port number: ");
-                     !(portNumber = input.readLine()).matches("\\d+");
-                     System.out.println("Try again\nInput a valid port number: "))
-                    ;
+                //Get the port number
+                do System.out.println("Port number: ");
+                while ((portNumber = input.readLine()).matches("\\d+"));
 
+                //Get the connection
                 getConnection(hostName, Integer.parseInt(portNumber));
                 break;
             }
@@ -98,22 +92,19 @@ public class ChatClient implements ConnectionHandler {
     }
 
     private void getConnection(String hostName, int portNumber) throws IOException {
-
-        server = new Socket(hostName, portNumber);
+        Socket server = new Socket(hostName, portNumber);
         connection = new Connection(this, server);
     }
 
     @Override
     public void notifyClose(Connection connection) {
-
-        System.out.println("Connection closed!");
+        System.out.println("connections.Connection closed!");
         try {
             while (true) {
                 System.out.println("Do you wish to (reconnect), or (exit)?: ");
                 switch (input.readLine()) {
                     case "reconnect":
                         getConnection();
-
                 }
             }
         }
@@ -126,13 +117,11 @@ public class ChatClient implements ConnectionHandler {
 
     @Override
     public void notifyConnection(Connection connection) {
-
         connection.startListen();
     }
 
     @Override
     public void notifyMessage(String message) {
-
         gui.display(message);
         System.out.println(message);
     }
