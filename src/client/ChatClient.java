@@ -1,3 +1,5 @@
+package client;
+
 import connections.*;
 import graphics.ChatGUI;
 
@@ -76,7 +78,7 @@ public class ChatClient implements ConnectionHandler {
 
                 //Get the port number
                 do System.out.println("Port number: ");
-                while ((portNumber = input.readLine()).matches("\\d+"));
+                while (!(portNumber = input.readLine()).matches("\\d+"));
 
                 //Get the connection
                 getConnection(hostName, Integer.parseInt(portNumber));
